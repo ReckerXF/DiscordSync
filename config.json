@@ -1,0 +1,10 @@
+﻿{
+    "botToken": "test",
+    "guildId":  5,
+    "rolesToSync": {
+        "roleID": "group.admin",
+        "roleID2": "group.staff"
+    },
+    "defaultACE": "builtin.everyone",
+    "whitelistRoleID":  5
+}
