@@ -10,11 +10,14 @@ namespace DiscordSync.Server
 {
     internal class Discord : BaseScript
     {
+        #region Variables
         private static HttpClient _httpClient = new HttpClient();
         private static string _botToken = Config.botToken;
         private static string _guildId = Config.guildId;
         private static List<string> userRoles = new List<string>();
+        #endregion
 
+        #region Constructor
         public Discord()
         {
             // Setup HttpClientHandler to disable SSL/TLS verification.
@@ -26,24 +29,15 @@ namespace DiscordSync.Server
 
             // Create the HttpClient using the handler.
             _httpClient = new HttpClient(handler);
-
-            EventHandlers["onResourceStart"] += new Action<string>(OnResourceStart);
         }
+        #endregion
 
-        private async void OnResourceStart(string resourceName)
-        {
-            try
-            {
-                Debug.WriteLine("Initializing DiscordSync...");
-                await Task.CompletedTask;
-            }
-
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error: {ex.Message}");
-            }
-        }
-
+        #region Discord Bot Handling
+        /// <summary>
+        /// Returns a list of Discord Roles that belongs to the player.
+        /// </summary>
+        /// <param name="discordId"></param>
+        /// <returns>List (String)</returns>
         public static async Task<List<string>> GetDiscordRoles(string discordId)
         {
             if (string.IsNullOrEmpty(_botToken) || string.IsNullOrEmpty(_guildId))
@@ -92,5 +86,6 @@ namespace DiscordSync.Server
             Debug.WriteLine($"[DiscordHttpClient] Retrieved {userRoles.Count} roles for user {discordId}.");
             return userRoles;
         }
+        #endregion
     }
 }

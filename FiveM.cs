@@ -41,11 +41,11 @@ namespace DiscordSync.Server
         [EventHandler("playerConnecting")]
         private static async void OnPlayerConnecting([FromSource] Player ply, string playerName, dynamic setKickReason, dynamic deferrals)
         {
-            // Handle Deferral
+            // Handle Deferral.
             deferrals.defer();
             deferrals.update("Retrieving join data...");
 
-            // Check if the player has discord connected to FiveM
+            // Check if the player has discord connected to FiveM.
             if (ply.Identifiers["discord"] == null || ply.Identifiers["steam"] == null)
             {
                 deferrals.done("You must have Discord and Steam connected to your FiveM to join the server!");
@@ -54,14 +54,14 @@ namespace DiscordSync.Server
 
             await GetInfo(ply);
 
-            // Handle Whitelisting
+            // Handle Whitelisting.
             if (!_whitelisted)
             {
                 deferrals.presentCard(deferralCardJson);
                 return;
             }
 
-            // Handle Rank Assignment
+            // Handle Rank Assignment.
             API.ExecuteCommand($"add_principal {_group}");
             deferrals.done();
             
@@ -75,6 +75,11 @@ namespace DiscordSync.Server
         #endregion
 
         #region Core Logic
+        /// <summary>
+        /// Obtains information through Discord and assigns obtained values in place of default variables (i.e. _group and _whitelisted).
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns>Task</returns>
         private static async Task GetInfo(Player player)
         {
             string plyDiscordId = player.Identifiers["discord"];
