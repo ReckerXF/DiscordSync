@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DiscordSync.Server

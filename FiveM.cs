@@ -3,10 +3,6 @@ using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Net.NetworkInformation;
 
 namespace DiscordSync.Server
 {
