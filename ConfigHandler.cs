@@ -11,13 +11,13 @@ namespace DiscordSync.Server
     {
         public static string botToken = GetConfig().botToken;
 
-        public static ulong guildId = GetConfig().guildId;
+        public static string guildId = GetConfig().guildId;
 
-        public static Dictionary<ulong, string> RolesToSync = GetConfig().rolesToSync;
+        public static Dictionary<string, string> rolesToSync = GetConfig().rolesToSync;
 
         public static string defaultACE = GetConfig().defaultACE;
 
-        public static ulong whitelistedRoleId = GetConfig().whitelistedRoleId;
+        public static string whitelistedRoleId = GetConfig().whitelistedRoleId;
 
 
         public static ConfigStruct GetConfig()

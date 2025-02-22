@@ -11,10 +11,10 @@ namespace DiscordSync.Server.Models
         public struct ConfigStruct
         {
             public string botToken { get; set; }
-            public ulong guildId { get; set; }
-            public Dictionary<ulong, string> rolesToSync { get; set; }
+            public string guildId { get; set; }
+            public Dictionary<string, string> rolesToSync { get; set; }
             public string defaultACE { get; set; }
-            public ulong whitelistedRoleId { get; set; }
+            public string whitelistedRoleId { get; set; }
         }
     }
 }

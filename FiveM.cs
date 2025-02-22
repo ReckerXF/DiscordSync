@@ -1,56 +1,102 @@
 ﻿using CitizenFX.Core;
-using Discord.WebSocket;
+using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using System.Net.NetworkInformation;
 
 namespace DiscordSync.Server
 {
     public class FiveM : BaseScript
     {
+        #region Variables
+        private static string deferralCardJson = "";
+        private static bool _whitelisted = false;
+        private static string _group = Config.defaultACE;
+
+        #endregion
+
+        #region Constructor
+        public FiveM()
+        {
+            Debug.WriteLine("DiscordSync by github.com/ReckerXF loaded!");
+
+            try
+            {
+                deferralCardJson = API.LoadResourceFile(API.GetCurrentResourceName(), "deferralCard.json");
+
+                if (string.IsNullOrEmpty(deferralCardJson))
+                {
+                    Debug.WriteLine("The deferralCard.json file is empty!");
+                }
+            }
+
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Json Error Reported: {e.Message}\nStackTrace:\n{e.StackTrace}");
+            }
+        }
+        #endregion
+
         #region Events
         [EventHandler("playerConnecting")]
-        private static void OnPlayerConnecting([FromSource] Player ply, string playerName, dynamic setKickReason, dynamic deferrals)
+        private static async void OnPlayerConnecting([FromSource] Player ply, string playerName, dynamic setKickReason, dynamic deferrals)
         {
+            // Handle Deferral
+            deferrals.defer();
+            deferrals.update("Retrieving join data...");
+
+            // Check if the player has discord connected to FiveM
+            if (ply.Identifiers["discord"] == null || ply.Identifiers["steam"] == null)
+            {
+                deferrals.done("You must have Discord and Steam connected to your FiveM to join the server!");
+                return;
+            }
+
+            await GetInfo(ply);
+
+            // Handle Whitelisting
+            if (!_whitelisted)
+            {
+                deferrals.presentCard(deferralCardJson);
+                return;
+            }
+
+            // Handle Rank Assignment
+            API.ExecuteCommand($"add_principal {_group}");
+            deferrals.done();
             
         }
 
         [EventHandler("playerDropped")]
         private static void OnPlayerDropped([FromSource] Player ply, string reason)
         {
-
+            API.ExecuteCommand($"add_principal {Config.defaultACE}");
         }
         #endregion
 
         #region Core Logic
-        private bool IsWhitelisted(Player player)
+        private static async Task GetInfo(Player player)
         {
-            if (player.Identifiers["discord"] == null) return false;
+            string plyDiscordId = player.Identifiers["discord"];
 
-            IReadOnlyCollection<SocketRole> discordRoles = DiscordSync.Server.Discord.GetDiscordRoles(player.Identifiers["discord"]);
+            List<string> discordRoles = await Discord.GetDiscordRoles(plyDiscordId);
 
-            foreach (SocketRole role in discordRoles)
+            foreach (string roleId in discordRoles)
             {
-                if (role.Id == Config.whitelistedRoleId) return true;
+                if (roleId == Config.whitelistedRoleId)
+                    _whitelisted = true;
             }
 
-            return false;
-        }
-
-        private string Rank(Player player)
-        {
-            if (player.Identifiers["discord"] == null) return Config.defaultACE;
-
-            IReadOnlyCollection<SocketRole> discordRoles = DiscordSync.Server.Discord.GetDiscordRoles(player.Identifiers["discord"]);
-
-            foreach (SocketRole role in discordRoles)
+            foreach (string roleId in discordRoles)
             {
-                if (Config.RolesToSync.TryGetValue(role.Id, out string rank)) return rank;
+                Config.rolesToSync.TryGetValue(roleId, out _group);
             }
 
-            return Config.defaultACE;
+            await Delay(200);
         }
         #endregion
 
