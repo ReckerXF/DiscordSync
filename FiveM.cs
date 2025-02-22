@@ -55,7 +55,7 @@ namespace DiscordSync.Server
             await GetInfo(ply);
 
             // Handle Whitelisting.
-            if (!_whitelisted)
+            if (_whitelisted == false)
             {
                 deferrals.presentCard(deferralCardJson);
                 return;
@@ -89,7 +89,12 @@ namespace DiscordSync.Server
             foreach (string roleId in discordRoles)
             {
                 if (roleId == Config.whitelistedRoleId)
+                {
                     _whitelisted = true;
+
+                    if (Config.debugMode)
+                        Debug.WriteLine($"{player.Name} has been marked as whitelisted!");
+                }
             }
 
             foreach (string roleId in discordRoles)
@@ -97,7 +102,7 @@ namespace DiscordSync.Server
                 Config.rolesToSync.TryGetValue(roleId, out _group);
             }
 
-            await Delay(200);
+            await Delay(300);
         }
         #endregion
 

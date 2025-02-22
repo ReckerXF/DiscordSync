@@ -6,5 +6,6 @@
         "roleID2": "group.staff"
     },
     "defaultACE": "builtin.everyone",
-    "whitelistRoleID":  "5"
+    "whitelistRoleID": "5",
+    "debug":  false
 }

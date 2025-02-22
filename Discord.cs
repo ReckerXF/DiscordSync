@@ -14,7 +14,6 @@ namespace DiscordSync.Server
         private static HttpClient _httpClient = new HttpClient();
         private static string _botToken = Config.botToken;
         private static string _guildId = Config.guildId;
-        private static List<string> userRoles = new List<string>();
         #endregion
 
         #region Constructor
@@ -40,36 +39,35 @@ namespace DiscordSync.Server
         /// <returns>List (String)</returns>
         public static async Task<List<string>> GetDiscordRoles(string discordId)
         {
-            if (string.IsNullOrEmpty(_botToken) || string.IsNullOrEmpty(_guildId))
-            {
-                Debug.WriteLine("Discord Bot token or Guild ID is not set.");
-                return null;
-            }
+            // Declare new list for the player's Discord roles.
+            List<string> userRoles = new List<string>();
 
-            // URL to fetch the guild member's roles
+            // URL to fetch the guild member's roles.
             string url = $"https://discord.com/api/v10/guilds/{_guildId}/members/{discordId}";
             
-            // Set the authorization headers
+            // Set the authorization headers.
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bot {_botToken}");
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            // Make the request
+            // Make the request.
             var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
             {
-                // Log the status code and response content for debugging
+                // Log the status code and response content for debugging.
                 string responseContent = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[DiscordHttpClient] Failed to fetch roles for user {discordId}. HTTP Status: {response.StatusCode}, Response: {responseContent}");
                 return null;
             }
 
-            // Log raw JSON content for debugging
+            // Log raw JSON content for debugging.
             string content = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"[DiscordHttpClient] Raw JSON response: {content}");
+            
+            if (Config.debugMode)
+                Debug.WriteLine($"[DiscordHttpClient] Raw JSON response: {content}");
 
             JObject json = JObject.Parse(content);
             var roles = json["roles"];
@@ -82,8 +80,10 @@ namespace DiscordSync.Server
                 userRoles.Add((string)role);
             }
             
+            if (Config.debugMode)
+                Debug.WriteLine($"[DiscordHttpClient] Retrieved {userRoles.Count} roles for user {discordId}.");
+
             // Return the list of roles.
-            Debug.WriteLine($"[DiscordHttpClient] Retrieved {userRoles.Count} roles for user {discordId}.");
             return userRoles;
         }
         #endregion

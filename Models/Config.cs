@@ -11,6 +11,7 @@ namespace DiscordSync.Server.Models
             public Dictionary<string, string> rolesToSync { get; set; }
             public string defaultACE { get; set; }
             public string whitelistedRoleId { get; set; }
+            public bool debugMode { get; set; }
         }
     }
 }

@@ -19,6 +19,8 @@ namespace DiscordSync.Server
 
         public static string whitelistedRoleId = GetConfig().whitelistedRoleId;
 
+        public static bool debugMode = GetConfig().debugMode;
+
 
         public static ConfigStruct GetConfig()
         {
