@@ -41,12 +41,16 @@ namespace DiscordSync.Server
         [EventHandler("playerConnecting")]
         private static async void OnPlayerConnecting([FromSource] Player ply, string playerName, dynamic setKickReason, dynamic deferrals)
         {
+            // Variables
+            string steamId = ply.Identifiers["steam"];
+            string discordId = ply.Identifiers["discord"];
+
             // Handle Deferral.
             deferrals.defer();
             deferrals.update("Retrieving join data...");
 
             // Check if the player has discord connected to FiveM.
-            if (ply.Identifiers["discord"] == null || ply.Identifiers["steam"] == null)
+            if (steamId == null || discordId == null)
             {
                 deferrals.done("You must have Discord and Steam connected to your FiveM to join the server!");
                 return;
@@ -62,7 +66,7 @@ namespace DiscordSync.Server
             }
 
             // Handle Rank Assignment.
-            API.ExecuteCommand($"add_principal {_group}");
+            API.ExecuteCommand($"add_principal steam.identifier:{steamId} {_group}");
             deferrals.done();
             
         }
@@ -70,7 +74,9 @@ namespace DiscordSync.Server
         [EventHandler("playerDropped")]
         private static void OnPlayerDropped([FromSource] Player ply, string reason)
         {
-            API.ExecuteCommand($"add_principal {Config.defaultACE}");
+            string steamId = ply.Identifiers["steam"];
+
+            API.ExecuteCommand($"add_principal steam.identifier:{steamId} {Config.defaultACE}");
         }
         #endregion
 
