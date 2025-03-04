@@ -66,7 +66,7 @@ namespace DiscordSync.Server
             }
 
             // Handle Rank Assignment.
-            API.ExecuteCommand($"add_principal steam.identifier:{steamId} {_group}");
+            API.ExecuteCommand($"add_principal identifier.steam:{steamId} {_group}");
             deferrals.done();
             
         }
@@ -76,7 +76,7 @@ namespace DiscordSync.Server
         {
             string steamId = ply.Identifiers["steam"];
 
-            API.ExecuteCommand($"add_principal steam.identifier:{steamId} {Config.defaultACE}");
+            API.ExecuteCommand($"add_principal identifier.steam:{steamId} {Config.defaultACE}");
         }
         #endregion
 
