@@ -67,6 +67,10 @@ namespace DiscordSync.Server
 
             // Handle Rank Assignment.
             API.ExecuteCommand($"add_principal identifier.steam:{steamId} {_group}");
+
+            if (Config.debugMode)
+                Debug.WriteLine($"{playerName} has joined with permissions: {_group}");
+
             deferrals.done();
             
         }
@@ -101,11 +105,11 @@ namespace DiscordSync.Server
                     if (Config.debugMode)
                         Debug.WriteLine($"{player.Name} has been marked as whitelisted!");
                 }
-            }
 
-            foreach (string roleId in discordRoles)
-            {
-                Config.rolesToSync.TryGetValue(roleId, out _group);
+                if (Config.rolesToSync.TryGetValue(roleId, out var group))
+                {
+                    _group = group;
+                }
             }
 
             await Delay(300);
