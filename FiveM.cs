@@ -2,6 +2,7 @@
 using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordSync.Server
@@ -10,8 +11,8 @@ namespace DiscordSync.Server
     {
         #region Variables
         private static string deferralCardJson = "";
-        private static bool _whitelisted = false;
-        private static string _group = Config.defaultACE;
+        private static List<string> _whitelistedPlys = new List<string>();
+        private static Dictionary<string, string> _plyGroups = new Dictionary<string, string>();
 
         #endregion
 
@@ -59,17 +60,25 @@ namespace DiscordSync.Server
             await GetInfo(ply);
 
             // Handle Whitelisting.
-            if (_whitelisted == false)
+            if (!_whitelistedPlys.Contains(ply.Handle))
             {
                 deferrals.presentCard(deferralCardJson);
                 return;
             }
 
+            string group = _plyGroups.ContainsKey(ply.Handle) ? _plyGroups[ply.Handle] : Config.defaultACE;
+
             // Handle Rank Assignment.
-            API.ExecuteCommand($"add_principal identifier.steam:{steamId} {_group}");
+            API.ExecuteCommand($"add_principal identifier.steam:{steamId} {group}");
 
             if (Config.debugMode)
-                Debug.WriteLine($"{playerName} has joined with permissions: {_group}");
+                Debug.WriteLine($"{playerName} has joined with permissions: {group}");
+
+
+            if (_plyGroups.ContainsKey(ply.Handle))
+                _plyGroups.Remove(ply.Handle);
+
+            _whitelistedPlys.Remove(ply.Handle);
 
             deferrals.done();
             
@@ -79,7 +88,6 @@ namespace DiscordSync.Server
         private static void OnPlayerDropped([FromSource] Player ply, string reason)
         {
             string steamId = ply.Identifiers["steam"];
-
             API.ExecuteCommand($"add_principal identifier.steam:{steamId} {Config.defaultACE}");
         }
         #endregion
@@ -94,13 +102,15 @@ namespace DiscordSync.Server
         {
             string plyDiscordId = player.Identifiers["discord"];
 
+            string _group = Config.defaultACE;
+
             List<string> discordRoles = await Discord.GetDiscordRoles(plyDiscordId);
 
             foreach (string roleId in discordRoles)
             {
                 if (roleId == Config.whitelistedRoleId)
                 {
-                    _whitelisted = true;
+                    _whitelistedPlys.Add(player.Handle);
 
                     if (Config.debugMode)
                         Debug.WriteLine($"{player.Name} has been marked as whitelisted!");
@@ -109,6 +119,8 @@ namespace DiscordSync.Server
                 if (Config.rolesToSync.TryGetValue(roleId, out var group))
                 {
                     _group = group;
+
+                    _plyGroups.Add(player.Handle, _group);
                 }
             }
 
