@@ -81,7 +81,6 @@ namespace DiscordSync.Server
             _whitelistedPlys.Remove(ply.Handle);
 
             deferrals.done();
-            
         }
 
         [EventHandler("playerDropped")]
@@ -110,17 +109,20 @@ namespace DiscordSync.Server
             {
                 if (roleId == Config.whitelistedRoleId)
                 {
-                    _whitelistedPlys.Add(player.Handle);
+                   if (!_whitelistedPlys.Contains(player.Handle))
+                   {
+                       if (Config.debugMode)
+                            Debug.WriteLine($"{player.Name} has been marked as whitelisted!");
 
-                    if (Config.debugMode)
-                        Debug.WriteLine($"{player.Name} has been marked as whitelisted!");
+                       _whitelistedPlys.Add(player.Handle); 
+                   }
                 }
 
                 if (Config.rolesToSync.TryGetValue(roleId, out var group))
                 {
                     _group = group;
 
-                    _plyGroups.Add(player.Handle, _group);
+                    _plyGroups[player.Handle] = _group;
                 }
             }
 
